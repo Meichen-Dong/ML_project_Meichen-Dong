@@ -1,2 +1,4 @@
 Progresslog:
-2025/11/28: 
+2025/11/28: - Create the Github repository, and add my code, data, and create this Progresslog.
+            - Try the optuna
+            
