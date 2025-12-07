@@ -31,8 +31,8 @@ table = st.sidebar.slider("Table %(= table width / maximum diameter)", min_value
 cut_str = st.sidebar.selectbox("Cut", options=list(CUT_MAPPING.keys()), index=0)
 color_str = st.sidebar.selectbox("Color", options=list(COLOR_MAPPING.keys()), index=1)
 clarity_str = st.sidebar.selectbox("Clarity", options=list(CLARITY_MAPPING.keys()), index=3)
-x = st.sidebar.slider("Length (X) mm", min_value=0.0, max_value=10.74, value=5.7, step=0.01)
-y = st.sidebar.slider("Width (Y) mm", min_value=0.0, max_value=58.9, value=5.7, step=0.01)
+x = st.sidebar.slider("Width (X) mm", min_value=0.0, max_value=10.74, value=5.7, step=0.01)
+y = st.sidebar.slider("Length (Y) mm", min_value=0.0, max_value=58.9, value=5.7, step=0.01)
 z = st.sidebar.slider("Height (Z) mm", min_value=0.0, max_value=31.8, value=3.5, step=0.01)
 
 cut = CUT_MAPPING[cut_str]
