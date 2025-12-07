@@ -17,7 +17,6 @@ CLARITY_MAPPING = {'I1': 1, 'SI2': 2, 'SI1': 3, 'VS2': 4, 'VS1': 5, 'VVS2': 6, '
 
 model_xgb = joblib.load('XGBoost_model.joblib')
 
-
 # --- Page user can see---
 
 st.title("Welcome To Predict The diamond price")
