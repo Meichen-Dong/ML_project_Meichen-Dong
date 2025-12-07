@@ -1,118 +1,110 @@
 import streamlit as st
+import joblib
 import pandas as pd
 import numpy as np
-import joblib
-from sklearn.ensemble import RandomForestRegressor # 仅用于加载类型检查
+import math
+import sys  # 用于在加载模型失败时退出程序
 
-# --- 配置 ---
-MODEL_PATH = 'random_forest_model.joblib'
+# --- 1. Streamlit 配置 (必须是第一个 Streamlit 命令) ---
+st.set_page_config(
+    page_title="💎 钻石价格预测应用 (Random Forest)",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# 重要的：定义分类特征的所有可能值
-# 这些值必须与您训练模型时数据集中出现的所有唯一值一致！
-CUT_OPTIONS = ['Ideal', 'Premium', 'Very Good', 'Good', 'Fair']
-COLOR_OPTIONS = ['D', 'E', 'F', 'G', 'H', 'I', 'J'] 
-CLARITY_OPTIONS = ['IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'I1'] 
-CATEGORICAL_FEATURES = ['cut', 'color', 'clarity']
-NUMERICAL_FEATURES = ['carat', 'depth', 'table']
+# --- 2. 硬编码分类特征映射 ---
+# 这些映射必须与训练模型时使用的编码一致！
+CUT_MAPPING = {'Ideal': 3, 'Premium': 4, 'Good': 2, 'Very Good': 5, 'Fair': 1}
+COLOR_MAPPING = {'E': 2, 'I': 6, 'J': 7, 'H': 5, 'F': 3, 'G': 4, 'D': 1}
+CLARITY_MAPPING = {'SI2': 4, 'SI1': 3, 'VS1': 5, 'VS2': 6, 'VVS2': 7, 'VVS1': 8, 'I1': 1, 'IF': 2}
 
-# --- 模型加载 ---
-# 使用 st.cache_resource 确保模型只加载一次
+
+# --- 3. 模型加载函数 (使用 Streamlit 缓存) ---
 @st.cache_resource
-def load_rf_model():
-    """加载已训练的 Random Forest 模型"""
-    try:
-        model = joblib.load(MODEL_PATH)
-        return model
-    except FileNotFoundError:
-        st.error(f"错误：未找到模型文件 '{MODEL_PATH}'。请确保文件已保存到当前目录。")
-        return None
+def load_model(path):
+    """加载已保存的 Random Forest 模型。"""
+    return joblib.load(path)
 
-rf_model = load_rf_model()
+# --- 4. 安全地加载模型 ---
+MODEL_PATH = 'random_forest_model.joblib'
+try:
+    model_rf = load_model(MODEL_PATH)
+except FileNotFoundError:
+    # ❌ 错误处理：模型文件不存在。
+    # 这里我们使用 st.error() 提示用户，因为 st.set_page_config() 已经调用。
+    st.error(f"严重错误：找不到模型文件 '{MODEL_PATH}'。请确保文件在相同目录下。")
+    st.stop()
+except Exception as e:
+    # ❌ 错误处理：加载模型时发生其他错误。
+    st.error(f"加载模型时发生错误: {e}")
+    st.stop()
 
-# --- Streamlit 界面 ---
-st.set_page_config(page_title="钻石价格预测", layout="wide")
-st.title("🌲 Random Forest 钻石价格预测器")
-st.markdown("请输入钻石的各项参数，模型将预测其对数价格。")
 
-# --- 输入侧边栏 ---
-with st.sidebar:
-    st.header("钻石参数输入")
+# --- 5. Streamlit 界面和用户输入 ---
 
-    # 数值特征
-    carat = st.slider("克拉 (Carat)", min_value=0.2, max_value=5.01, value=1.0, step=0.01)
-    depth = st.slider("深度百分比 (Depth %)", min_value=43.0, max_value=79.0, value=61.8, step=0.1)
-    table = st.slider("桌面宽度百分比 (Table %)", min_value=43.0, max_value=95.0, value=57.0, step=1.0)
+st.title("💎 钻石价格预测应用")
+st.markdown("### 使用优化后的 Random Forest 模型预测")
 
-    # 分类特征
-    cut = st.selectbox("切工 (Cut)", options=CUT_OPTIONS, index=CUT_OPTIONS.index('Ideal'))
-    color = st.selectbox("颜色 (Color)", options=COLOR_OPTIONS, index=COLOR_OPTIONS.index('G'))
-    clarity = st.selectbox("净度 (Clarity)", options=CLARITY_OPTIONS, index=CLARITY_OPTIONS.index('VS2'))
+st.sidebar.header("输入钻石特征")
 
-# --- 预测逻辑 ---
+# 用户通过侧边栏输入特征
+carat = st.sidebar.slider("克拉 (Carat)", min_value=0.2, max_value=5.01, value=0.7, step=0.01)
+depth = st.sidebar.slider("深度百分比 (Depth %)", min_value=43.0, max_value=79.0, value=61.8, step=0.1)
+table = st.sidebar.slider("桌面宽度百分比 (Table %)", min_value=43.0, max_value=95.0, value=57.0, step=0.1)
+x = st.sidebar.slider("长度 (X) mm", min_value=0.0, max_value=10.74, value=5.7, step=0.01)
+y = st.sidebar.slider("宽度 (Y) mm", min_value=0.0, max_value=58.9, value=5.7, step=0.01)
+z = st.sidebar.slider("高度 (Z) mm", min_value=0.0, max_value=31.8, value=3.5, step=0.01)
 
-def preprocess_input(input_df):
-    """
-    对输入数据进行与训练集相同的预处理 (独热编码)
-    **注意：这要求处理后的特征列名和顺序必须与训练模型时的X特征完全一致！**
-    """
+cut_str = st.sidebar.selectbox("切工 (Cut)", options=list(CUT_MAPPING.keys()), index=0)
+color_str = st.sidebar.selectbox("颜色 (Color)", options=list(COLOR_MAPPING.keys()), index=1)
+clarity_str = st.sidebar.selectbox("净度 (Clarity)", options=list(CLARITY_MAPPING.keys()), index=3)
+
+
+# --- 6. 特征工程和数据准备 ---
+
+# 分类特征编码
+cut = CUT_MAPPING[cut_str]
+color = COLOR_MAPPING[color_str]
+clarity = CLARITY_MAPPING[clarity_str]
+
+# 计算新特征 (与Jupyter Notebook中的步骤一致)
+volume = x * y * z
+density = carat / volume if volume != 0 else 0.0
+xy_ratio = x / y if y != 0 else 0.0
+
+# 准备预测数据 DataFrame - 确保列顺序与训练时一致！
+input_data = pd.DataFrame({
+    'carat': [carat],
+    'cut': [cut],
+    'color': [color],
+    'clarity': [clarity],
+    'depth': [depth],
+    'table': [table],
+    'x': [x],
+    'y': [y],
+    'z': [z],
+    'volume': [volume],
+    'density': [density],
+    'xy_ratio': [xy_ratio]
+})
+
+# --- 7. 预测与结果展示 ---
+
+st.subheader("您输入的钻石特征和派生特征")
+st.dataframe(input_data)
+st.markdown("---")
+
+if st.button("🚀 预测钻石价格"):
     
-    # 1. 对分类特征进行独热编码
-    df_dummies = pd.get_dummies(input_df, columns=CATEGORICAL_FEATURES, drop_first=False)
+    # 预测对数价格 (Log Price)
+    log_price_pred = model_rf.predict(input_data)[0]
     
-    # 2. 确保所有可能的哑变量列都存在 (即使当前输入中没有)
-    # 这一步非常关键，以保证特征数量一致
-    all_dummy_cols = [
-        *[f'cut_{c}' for c in CUT_OPTIONS], 
-        *[f'color_{c}' for c in COLOR_OPTIONS], 
-        *[f'clarity_{c}' for c in CLARITY_OPTIONS]
-    ]
-    
-    # 3. 填充缺失的列 (如果用户没有选某个类别，则该列值为0)
-    for col in all_dummy_cols:
-        if col not in df_dummies.columns:
-            df_dummies[col] = 0
-            
-    # 4. 确保最终特征的顺序与训练模型时的顺序一致
-    # 假设训练特征是 [数值特征] + [所有哑变量特征]
-    final_cols = NUMERICAL_FEATURES + sorted(all_dummy_cols) 
-    
-    return df_dummies[final_cols]
+    # 转换回实际价格 (Price)
+    price_pred = np.exp(log_price_pred)
 
-
-if st.button("开始预测价格"):
-    if rf_model is not None:
-        try:
-            # 1. 创建原始输入 DataFrame
-            input_raw = pd.DataFrame({
-                'carat': [carat], 'depth': [depth], 'table': [table],
-                'cut': [cut], 'color': [color], 'clarity': [clarity]
-            })
-
-            # 2. 预处理数据
-            input_processed = preprocess_input(input_raw)
-            
-            # 3. 进行对数价格预测
-            log_price_prediction = rf_model.predict(input_processed)[0]
-            
-            # 4. 将对数价格转换回原始价格 (e^y)
-            final_price = np.exp(log_price_prediction)
-
-            # --- 结果展示 ---
-            st.success("✅ 预测完成！")
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric(
-                    label="预测对数价格 (Log Price)", 
-                    value=f"{log_price_prediction:.4f}"
-                )
-            with col2:
-                 st.metric(
-                    label="**预测最终价格 ($)**", 
-                    value=f"${final_price:,.2f}"
-                )
-
-            st.balloons()
-            
-        except Exception as e:
-            st.error(f"预测失败，请检查模型和预处理步骤是否匹配训练过程。错误详情: {e}")
+    st.subheader("✨ 预测结果")
+    st.success(f"模型预测的钻石价格（美元）为：")
+    st.balloons()
+    st.write(f"## **${price_pred:,.2f}**")
+    st.caption(f"---")
+    st.info(f"注意：模型预测的是对数价格 ($\log(\text{{Price}})$: ${log_price_pred:.4f}$)，然后转换回实际价格。")
