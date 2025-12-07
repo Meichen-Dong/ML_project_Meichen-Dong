@@ -68,7 +68,7 @@ y (width) is the second most influential geometric feature (around 0.34).
 Clarity and color also contribute meaningfully, but other features such as x, z, volume, xy_ratio, depth, table, density, and cut have smaller impact and play more supporting roles.
 
 ## 7. Streamlit Application
-1. Open the website (run "streamlit run app.py" in Terminal or just click on the link ).
+1. Open the website (run "streamlit run app.py" in Terminal or just click on the link http://192.168.245.74:8501 ).
 2. Use the sidebar on the left to input the diamond’s characteristics as you want, then the app will automatically computes the engineered features (volume, density, xy_ratio).
 3. Click “Click me to predict” to generate the price estimate.
 
