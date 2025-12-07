@@ -2,8 +2,7 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
-import math
-import sys 
+from pathlib import Path 
 
 st.set_page_config(
     page_title="Diamond price prediction",
@@ -15,7 +14,11 @@ CUT_MAPPING = {'Fair': 1, 'Good': 2, 'Very Good': 3, 'Premium': 4, 'Ideal': 5}
 COLOR_MAPPING = {'J': 1, 'I': 2, 'H': 3, 'G': 4, 'F': 5, 'E': 6, 'D': 7}
 CLARITY_MAPPING = {'I1': 1, 'SI2': 2, 'SI1': 3, 'VS2': 4, 'VS1': 5, 'VVS2': 6, 'VVS1': 7, 'IF': 8}
 
-model_xgb = joblib.load('XGBoost_model.joblib')
+#model_xgb = joblib.load('XGBoost_model.joblib')
+
+ROOT = Path(__file__).resolve().parent.parent
+MODEL_PATH = ROOT / "XGBoost_model.joblib"
+model_xgb = joblib.load(MODEL_PATH)
 
 # --- Page user can see---
 
