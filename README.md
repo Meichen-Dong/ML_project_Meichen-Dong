@@ -17,30 +17,29 @@ Target variable: price (continuous) -- In the model, we use its logrithm value, 
 
 Feature	Description:
 
-carat	    Weight of the diamond (continuous)
+carat:	        (continuous) Weight of the diamond 
 
-depth	    Depth percentage = height / avg diameter * 100 (continuous)
+depth:	        (continuous) Depth percentage = height / avg diameter * 100 
 
-table	    The ratio of the width of the largest flat surface at the top of the diamond (called the 
-"table facet") to the widest part of the diamond. (continuous)
+table:	        (continuous) The ratio of the width of the largest flat surface at the top of the diamond (called the "table facet") to the widest part of the diamond. 
 
-x, y, z	    Diamond dimensions in Width, Length, Height (continuous) 
+x, y, z:	    (continuous) Diamond dimensions in Width, Length, Height  
 
-cut	        The cut type of the Diamond, it determines the shine (Fair, Good, Very Good, Premium, Ideal)(categorical) 
+cut:	        (categorical) The cut type of the Diamond, it determines the shine (Fair, Good, Very Good, Premium, Ideal) 
 
-color	    Graded from D (best) to J (worst)  (categorical)
+color:	        (categorical) Graded from D (best) to J (worst)  
 
-clarity	    Graded from I1 (worst) to IF (best)  (categorical) 
+clarity:	    (categorical) Graded from I1 (worst) to IF (best)   
 
-price	    Target variable (continuous) 
+price:	        (continuous) Target variable  
 
 Additional features:
 
-volume      x * y * z (continuous) 
+volume:          (continuous) x * y * z  
 
-density     carat / volume  (continuous) 
+density:         (continuous) carat / volume  
 
-xy_ratio    x / y (This value measures whether a diamond is close to a perfect circle. The closer the value to 1, the closer the diamond is a perfect circle)  (continuous) 
+xy_ratio:        (continuous) x / y (This value measures whether a diamond is close to a perfect circle. The closer the value to 1, the closer the diamond is a perfect circle)   
 
 I add these engineered features to improve the model performance.
 
