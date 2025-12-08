@@ -16,22 +16,20 @@ Dataset including 53940 samples and 10 features originally.
 Target variable: price (continuous) -- In the model, we use its logrithm value, which can helps handle the variance
 
 Feature	Description:
-carat	    (continuous) Weight of the diamond
-depth	    (continuous) Depth percentage = height / avg diameter * 100
-table	    (continuous) The ratio of the width of the largest flat surface at the top of the diamond (called the 
-                        "table facet") to the widest part of the diamond.
-x, y, z	    (continuous) Diamond dimensions in Width, Length, Height
-cut	        (categorical) The cut type of the Diamond, it determines the shine (Fair, Good, Very Good, Premium, 
-                          Ideal)
-color	    (categorical) Graded from D (best) to J (worst)
-clarity	    (categorical) Graded from I1 (worst) to IF (best)
-price	    (continuous) Target variable
+carat	    Weight of the diamond (continuous)
+depth	    Depth percentage = height / avg diameter * 100 (continuous)
+table	    The ratio of the width of the largest flat surface at the top of the diamond (called the 
+"table facet") to the widest part of the diamond. (continuous)
+x, y, z	    Diamond dimensions in Width, Length, Height (continuous) 
+cut	        The cut type of the Diamond, it determines the shine (Fair, Good, Very Good, Premium, Ideal)(categorical) 
+color	    Graded from D (best) to J (worst)  (categorical)
+clarity	    Graded from I1 (worst) to IF (best)  (categorical) 
+price	    Target variable (continuous) 
 
 Additional features:
-volume      (continuous) x * y * z
-density     (continuous) carat / volume
-xy_ratio    (continuous) x / y (This value measures whether a diamond is close to a perfect circle. The closer the 
-                         value to 1, the closer the diamond is a perfect circle)
+volume      x * y * z (continuous) 
+density     carat / volume  (continuous) 
+xy_ratio    x / y (This value measures whether a diamond is close to a perfect circle. The closer the value to 1, the closer the diamond is a perfect circle)  (continuous) 
 
 I add these engineered features to improve the model performance.
 
